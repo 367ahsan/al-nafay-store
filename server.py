@@ -48,7 +48,7 @@ class Handler(BaseHTTPRequestHandler):
         if path=='/' : return self.serve_file('website.html')
         if path=='/admin': return self.serve_file('admin.html')
         if path.startswith('/media/'): return self.serve_file(path.lstrip('/'))
-        if path.endswith('.html') and os.path.isfile(os.path.join(BASE,path.lstrip('/'))): return self.serve_file(path.lstrip('/'))
+        if path.endswith('.html') and os.path.isfile(os.path.join(BASE,'public',path.lstrip('/'))): return self.serve_file(path.lstrip('/'))
         return send_json(self,{'error':'Not found'},404)
     def do_POST(self):
         path=urlparse(self.path).path; d=read_json(self)
@@ -79,7 +79,7 @@ class Handler(BaseHTTPRequestHandler):
             pid=int(path.rsplit('/',1)[1]); c=db(); c.execute('DELETE FROM products WHERE id=?',(pid,)); c.commit(); c.close(); return send_json(self,{'ok':True})
         return send_json(self,{'error':'Not found'},404)
     def serve_file(self,rel):
-        path=os.path.normpath(os.path.join(BASE,rel))
+        path=os.path.normpath(os.path.join(BASE,'public',rel))
         if not path.startswith(BASE) or not os.path.isfile(path): return send_json(self,{'error':'File not found'},404)
         data=open(path,'rb').read(); typ=mimetypes.guess_type(path)[0] or 'application/octet-stream'; self.send_response(200); self.send_header('Content-Type',typ); self.send_header('Content-Length',str(len(data))); self.end_headers(); self.wfile.write(data)
 
